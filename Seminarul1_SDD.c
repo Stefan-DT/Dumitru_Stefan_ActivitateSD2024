@@ -12,6 +12,7 @@ struct Masina {
 };
 
 //char * punem in parametrii ca sa nu mai creeam inca o masina si pentru a nu ocupa memorie pe stiva
+
 void afisareMasina(const struct Masina* m) {
 	if (m->marca != NULL) {
 		printf("Marca este: %s\n", m->marca);
