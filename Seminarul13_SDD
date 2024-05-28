@@ -1,0 +1,100 @@
+//graf
+#define CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+#include <malloc.h>
+#include <stdlib.h>
+
+typedef struct Metrou Metrou;
+typedef struct NodPrincipal NodPrincipal;
+typedef struct NodSecundar NodSecundar;
+
+struct Metrou{
+	int serie;
+	int nrStatii;
+	char* magistrala;
+};
+
+struct NodPrincipal {
+	Metrou info;
+	NodPrincipal* next;
+	NodSecundar* vecini;
+};
+
+struct NodSecundar {
+	NodPrincipal* nod;
+	NodSecundar* next;
+};
+
+//functie initializare Metrou
+Metrou creareMetrou(int serie, int nrStatii, char* magistrala) {
+	Metrou m;
+	m.serie = serie;
+	m.nrStatii = nrStatii;
+	m.magistrala = (char*)malloc(sizeof(char) * (strlen(magistrala) + 1));
+	strcpy_s(m.magistrala, strlen(magistrala)+1, magistrala);
+	return m;
+}
+
+//inserare la inceput in lista principala
+void inserareInceputPrincipala(NodPrincipal** cap, Metrou m) {
+	NodPrincipal* nou = (NodPrincipal*)malloc(sizeof(NodPrincipal));
+	nou->info = m;
+	nou->next = *cap;
+	nou->vecini = NULL;
+	*cap = nou;
+}
+
+//cautare nod dupa serie; returneaza adresa unui nod principal
+NodPrincipal* cautaNodDupaSerie(NodPrincipal* graf, int serie) {
+	while (graf && graf->info.serie!=serie) {
+		graf = graf->next;
+	}
+	return graf;
+}
+
+//inserare final lista secundara
+NodSecundar* inserareFinalSecundar(NodSecundar* cap, NodPrincipal* nod) {
+	NodSecundar* nou = (NodSecundar*)malloc(sizeof(NodSecundar));
+	nou->next = NULL;
+	nou->nod = nod;
+	if (cap) {
+		NodSecundar* aux = cap;
+		while (aux->next) {
+			aux = aux->next;
+		}
+		aux->next = nou;
+		return cap;
+	}
+	else {
+		return nou;
+	}
+}
+
+//functia de inserare muchie
+void inserareMuchie(NodPrincipal* graf, int serieStart, int serieStop) {
+	NodPrincipal* nodStart = cautaNodDupaSerie(graf, serieStart);
+	NodPrincipal* nodStop = cautaNodDupaSerie(graf, serieStop);
+	if (nodStart && nodStop) {//verificam daca exista ambele pt ca trb sa le am pe ambele
+		nodStart->vecini = inserareFinalSecundar(nodStart->vecini, nodStop);
+		nodStop->vecini = inserareFinalSecundar(nodStop->vecini, nodStart);//fac de 2 ori pt ca e graf neorientat si merge in ambele sensuri
+	}
+}
+
+//ramane sa facem parcurgerile data viit
+
+void main() {
+	NodPrincipal* graf = NULL;
+	inserareInceputPrincipala(&graf, creareMetrou(4, 6, "M2"));
+	inserareInceputPrincipala(&graf, creareMetrou(3, 7, "M1"));
+	inserareInceputPrincipala(&graf, creareMetrou(2, 8, "M4"));
+	inserareInceputPrincipala(&graf, creareMetrou(1, 12, "M5"));
+	inserareInceputPrincipala(&graf, creareMetrou(0, 4, "M6"));
+
+	inserareMuchie(graf, 0, 1);
+	inserareMuchie(graf, 1, 2);
+	inserareMuchie(graf, 1, 3);
+	inserareMuchie(graf, 1, 4);
+	inserareMuchie(graf, 2, 3);
+
+}
